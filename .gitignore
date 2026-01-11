@@ -1,0 +1,12 @@
+Oct-a-bus/models/
+Oct-a-bus/pipeline/output/
+Oct-a-bus/pipeline/uploads/
+Oct-a-bus/__pycache__/
+Oct-a-bus/.venv/
+*.pt
+*.pkl
+*.safetensors
+*.enc
+*.key
+.env
+*.log

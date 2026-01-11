@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin Upload - Pipeline</title>
+    <style>
+      body { background: linear-gradient(180deg,#f3eaff,#e9e6ff); color:#222; font-family: Arial, sans-serif; }
+      /* smoky overlay */
+      body::after { content: ""; position: fixed; left:0; right:0; top:0; bottom:0; pointer-events:none; background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.6), transparent 20%), radial-gradient(circle at 80% 80%, rgba(230,220,255,0.5), transparent 25%); mix-blend-mode: overlay; }
+      .container { max-width: 900px; margin: 60px auto; padding: 28px; background: rgba(255,255,255,0.8); border-radius:12px; box-shadow: 0 6px 30px rgba(100,60,150,0.12); }
+      h1 { color: #5b2d8a; }
+      label { display:inline-block; margin-right:12px }
+      input[type=file]{ color: #000 }
+      button { background:linear-gradient(180deg,#7b3bd6,#5b2d8a); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer }
+      button:hover{ filter:brightness(1.05) }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Admin Upload</h1>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Choose Excel (.xlsx) or CSV file:</label>
+        <input type="file" id="file" name="file" accept=".xlsx,.xls,.csv" required />
+        <button type="submit">Upload & Process</button>
+      </form>
+    </div>
+  </body>
+</html>

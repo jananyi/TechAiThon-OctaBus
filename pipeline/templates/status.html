@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Processing Status</title>
+    <style>
+      body { background: linear-gradient(180deg,#f3eaff,#e9e6ff); color:#222; font-family: Arial, sans-serif }
+      body::after { content: ""; position: fixed; left:0; right:0; top:0; bottom:0; pointer-events:none; background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.6), transparent 20%), radial-gradient(circle at 80% 80%, rgba(230,220,255,0.5), transparent 25%); mix-blend-mode: overlay; }
+      .container { max-width:900px; margin:40px auto; padding:22px; background:rgba(255,255,255,0.94); border-radius:12px; box-shadow:0 10px 30px rgba(80,50,140,0.06) }
+      .loader { font-size: 18px; }
+      .ok { color: #2a9d46 }
+      .err { color: #d64545 }
+      a { color:#5b2d8a }
+      ul#stepsList li { padding:8px 0; font-weight:600 }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Processing Status</h1>
+      <div id="statusArea">
+        <p class="loader">Starting...</p>
+        <ul id="stepsList" style="list-style:none;padding-left:0">
+          <li id="s_edge">⬜ Update edge.pt</li>
+          <li id="s_fog">⬜ Validation in fog.pt</li>
+          <li id="s_valid">⬜ Validated dataset</li>
+          <li id="s_store">⬜ Store in dataset (global_kb.jsonl)</li>
+          <li id="s_encrypt">⬜ Encrypted to global.pt</li>
+          <li id="s_sync">⬜ Sync to edge layer</li>
+        </ul>
+      </div>
+      <div id="resultArea" style="display:none">
+        <h2>Result</h2>
+        <div id="result"></div>
+        <p><a href="/">Upload another file</a></p>
+      </div>
+
+    <script>
+      const jobid = "{{ jobid }}";
+      const statusUrl = `/status/${jobid}`;
+      const summaryUrl = `/pipeline/output/${jobid}.summary.json`;
+
+      async function poll() {
+        try {
+          const r = await fetch(statusUrl);
+          const txt = await r.text();
+          let obj = {};
+          try { obj = JSON.parse(txt); } catch(e){ obj = {stage:'unknown', message:txt}; }
+          document.getElementById('statusArea').innerHTML = `<p>Stage: <strong>${obj.stage}</strong></p><p>${obj.message || ''}</p>`;
+
+          if (obj.stage === 'done') {
+            // show result summary file if present
+            try {
+              const sres = await fetch(`/summary/${jobid}`);
+              if (sres.ok) {
+                const summary = await sres.json();
+                let html = `<p class="ok">${summary.report}</p>`;
+                html += `<ul>`;
+                const keys = ['edge_enc','fog_enc','global_enc','edge_key','fog_key','global_key'];
+                for (const k of keys) {
+                  if (summary[k]) {
+                    // build download path relative to /download
+                    const p = summary[k].split('/pipeline/output/').pop();
+                    html += `<li><a href="/download/${p}">${k}</a></li>`;
+                  }
+                }
+                html += `</ul>`;
+                document.getElementById('result').innerHTML = html;
+                document.getElementById('resultArea').style.display = 'block';
+                document.getElementById('statusArea').style.display = 'none';
+                return;
+              }
+            } catch(e) {
+              console.warn('no summary yet');
+            }
+          }
+          // update checklist if steps available
+          if (obj.steps) {
+            document.getElementById('s_edge').innerText = (obj.steps.edge_updated? '✅':'⬜') + ' Update edge.pt';
+            document.getElementById('s_fog').innerText = (obj.steps.fog_validated? '✅':'⬜') + ' Validation in fog.pt';
+            document.getElementById('s_valid').innerText = (obj.steps.validated_dataset? '✅':'⬜') + ' Validated dataset';
+            document.getElementById('s_store').innerText = (obj.steps.stored_in_global? '✅':'⬜') + ' Store in dataset (global_kb.jsonl)';
+            document.getElementById('s_encrypt').innerText = (obj.steps.encrypted_global? '✅':'⬜') + ' Encrypted to global.pt';
+            document.getElementById('s_sync').innerText = (obj.steps.synced_to_edge? '✅':'⬜') + ' Sync to edge layer';
+          }
+
+          if (obj.stage === 'error') {
+            document.getElementById('statusArea').innerHTML = `<p class="err">Error: ${obj.message}</p>`;
+          }
+        } catch (e) {
+          document.getElementById('statusArea').innerText = 'Error polling status';
+        }
+        setTimeout(poll, 1000);
+      }
+      poll();
+    </script>
+  </body>
+</html>

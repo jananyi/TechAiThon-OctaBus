@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Global KB Chat</title>
+    <style>
+      body{font-family:Arial,Helvetica,sans-serif;background:#f7f6fb}
+      .wrap{max-width:900px;margin:30px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 18px rgba(80,50,140,0.06)}
+      .messages{height:400px;overflow:auto;border:1px solid #eee;padding:12px;border-radius:8px;background:#fbfbff}
+      .msg{margin:8px 0;padding:8px;border-radius:8px}
+      .user{background:#e8f0ff;text-align:right}
+      .bot{background:#f1f0ff}
+      .controls{display:flex;gap:8px;margin-top:12px}
+      input[type=text]{flex:1;padding:10px;border-radius:6px;border:1px solid #ddd}
+      input[type=text]:focus{outline:none;border-color:#5b2d8a}
+      button{padding:10px 14px;border-radius:6px;border:none;background:#5b2d8a;color:#fff;cursor:pointer}
+      button:hover{background:#4a1f6a}
+      button:disabled{background:#ccc;cursor:not-allowed}
+      .meta{font-size:12px;color:#666;margin-top:8px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h2>Global KB Chat (answers only from dataset)</h2>
+      <div class="messages" id="msgs"></div>
+      <div class="controls">
+        <input id="q" type="text" placeholder="Ask a question about the dataset..." />
+        <button id="send">Send</button>
+      </div>
+      <div class="meta">Note: Answers are generated using TinyLlama 1.1B model based on the global knowledge base dataset (global_kb.jsonl). The model analyzes relevant entries from the dataset to provide answers.</div>
+    </div>
+    <script>
+      const msgs = document.getElementById('msgs');
+      function add(role,text){
+        const d=document.createElement('div'); d.className='msg '+(role==='user'?'user':'bot'); d.innerText=text; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
+      const sendBtn = document.getElementById('send');
+      const input = document.getElementById('q');
+      function sendMessage(){
+        const q = input.value.trim(); 
+        if(!q) return; 
+        add('user',q); 
+        input.value='';
+        sendBtn.disabled = true;
+        add('bot','…thinking…');
+        fetch('/chat', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({q})})
+          .then(r => r.json())
+          .then(j => {
+            msgs.lastChild.innerText = j.reply || 'No answer found.';
+            if (j.source) {
+              const s = document.createElement('div'); 
+              s.style.fontSize='12px'; 
+              s.style.color='#666'; 
+              s.innerText = 'Source: ' + j.source; 
+              msgs.appendChild(s);
+            }
+            sendBtn.disabled = false;
+          })
+          .catch(e => { 
+            msgs.lastChild.innerText='Error contacting server: ' + e.message; 
+            sendBtn.disabled = false;
+          });
+      }
+      sendBtn.onclick = sendMessage;
+      input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); }
+    </script>
+  </body>
+</html>

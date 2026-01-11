@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Processing Result</title>
+    <style>
+      body { background: linear-gradient(180deg,#f3eaff,#e9e6ff); color:#222; font-family:Arial, sans-serif }
+      body::after { content: ""; position: fixed; left:0; right:0; top:0; bottom:0; pointer-events:none; background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.6), transparent 20%), radial-gradient(circle at 80% 80%, rgba(230,220,255,0.5), transparent 25%); mix-blend-mode: overlay; }
+      .card { max-width:900px; margin:40px auto; padding:22px; background:rgba(255,255,255,0.92); border-radius:12px; box-shadow:0 10px 30px rgba(80,50,140,0.08) }
+      a { color:#5b2d8a }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Processing Result</h1>
+      {% if error %}
+        <p style="color:#ff8080;">Error: {{ error }}</p>
+      {% else %}
+        <p><strong>{{ summary.report }}</strong></p>
+        <ul>
+          <li>Duplicates: {{ summary.duplicates }}</li>
+          <li>New entries: {{ summary.new_entries }}</li>
+        </ul>
+
+        <h3>Encrypted files (download)</h3>
+        <ul>
+          {% for key in ['edge_enc', 'fog_enc', 'global_enc'] %}
+            {% if summary[key + '_url'] %}
+              <li><a href="{{ summary[key + '_url'] }}">{{ key }}</a></li>
+            {% else %}
+              <li>{{ key }}: not available</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+
+        <h3>Keys (download)</h3>
+        <ul>
+          {% for key in ['edge_key', 'fog_key', 'global_key'] %}
+            {% if summary[key + '_url'] %}
+              <li><a href="{{ summary[key + '_url'] }}">{{ key }}</a></li>
+            {% else %}
+              <li>{{ key }}: not available</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <p><a href="/">Upload another file</a></p>
+    </div>
+  </body>
+</html>
