@@ -73,11 +73,12 @@ def status(jobid):
     status_path = OUTPUT_DIR / f"{jobid}.status.json"
     if status_path.exists():
         try:
-            return status_path.read_text(encoding='utf-8')
-        except Exception:
-            return json.dumps({"stage": "unknown", "message": "could not read status"})
+            content = status_path.read_text(encoding='utf-8')
+            return content, 200, {'Content-Type': 'application/json'}
+        except Exception as e:
+            return json.dumps({"stage": "unknown", "message": "could not read status"}), 200, {'Content-Type': 'application/json'}
     else:
-        return json.dumps({"stage": "pending", "message": "waiting for processing to start"})
+        return json.dumps({"stage": "pending", "message": "waiting for processing to start"}), 200, {'Content-Type': 'application/json'}
 
 
 @app.route('/status_page/<jobid>')
@@ -108,6 +109,31 @@ def chat():
     if not q:
         return {'reply': '', 'source': ''}
 
+    q_lower = q.lower().strip()
+    
+    # Handle casual greetings
+    greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'hi there', 'hello there']
+    if any(q_lower.startswith(g) or q_lower == g for g in greetings):
+        return {
+            'reply': 'Hello! I\'m here to help you with questions about the knowledge base. Feel free to ask me anything related to the dataset!',
+            'source': 'System'
+        }
+    
+    # Handle developer/creator questions
+    dev_keywords = ['who develop', 'who created', 'who made', 'who built', 'developer', 'creator', 'made by', 'built by', 'developed by']
+    if any(keyword in q_lower for keyword in dev_keywords):
+        return {
+            'reply': 'I was developed by the Octabus team for the Xebia Tech AI Thon Season 3. I\'m designed to answer questions based on the global knowledge base dataset.',
+            'source': 'System'
+        }
+    
+    # Handle thank you and goodbye
+    if any(phrase in q_lower for phrase in ['thank you', 'thanks', 'bye', 'goodbye', 'see you']):
+        return {
+            'reply': 'You\'re welcome! Feel free to ask if you have any more questions.',
+            'source': 'System'
+        }
+
     # load global KB entries
     try:
         entries = read_global_kb(BASE_DIR / 'global_kb.jsonl')
@@ -117,22 +143,39 @@ def chat():
     if not entries:
         return {'reply': 'No dataset available. Please upload data first.', 'source': ''}
 
-    # Retrieve relevant entries using sequence matching (get top 5 for context)
+    # Retrieve relevant entries using sequence matching (get top 3-4 for better context)
     from difflib import SequenceMatcher
     scored_entries = []
-    qnorm = q.lower()
+    qnorm = q_lower
+    
+    # Extract keywords from question for better matching
+    question_words = set(qnorm.split())
+    
     for e in entries:
-        combined = ((e.get('topic') or '') + ' ' + (e.get('text') or '')).lower()
-        score = SequenceMatcher(None, qnorm, combined).ratio()
-        if score > 0.1:  # Lower threshold to get more context
+        topic = (e.get('topic') or '').lower()
+        text = (e.get('text') or '').lower()
+        combined = f"{topic} {text}"
+        
+        # Calculate score based on word overlap and sequence similarity
+        entry_words = set(combined.split())
+        word_overlap = len(question_words & entry_words) / max(len(question_words), 1)
+        seq_score = SequenceMatcher(None, qnorm, combined).ratio()
+        
+        # Combined score (weighted)
+        score = (word_overlap * 0.6) + (seq_score * 0.4)
+        
+        if score > 0.12:  # Lower threshold to catch more relevant entries
             scored_entries.append((score, e))
     
-    # Sort by score and take top 5
+    # Sort by score and take top 3-4 (enough context but not too slow)
     scored_entries.sort(reverse=True, key=lambda x: x[0])
-    relevant_entries = [e for _, e in scored_entries[:5]]
+    relevant_entries = [e for _, e in scored_entries[:4]]
 
     if not relevant_entries:
-        return {'reply': 'No relevant entries found in the dataset for this question.', 'source': ''}
+        return {
+            'reply': 'I couldn\'t find relevant information in the dataset for your question. Please try rephrasing or ask about topics that are in the knowledge base.',
+            'source': ''
+        }
 
     # Build source information from best matches
     best_entry = relevant_entries[0]
@@ -144,7 +187,7 @@ def chat():
     try:
         from llama_local import answer_with_model
         reply = answer_with_model(q, relevant_entries)
-        if reply:
+        if reply and reply.strip():
             return {'reply': reply, 'source': source}
     except Exception as e:
         # If model fails, fall back to best match text
@@ -154,7 +197,7 @@ def chat():
         pass
 
     # Fallback: return best match text if model fails
-    reply = best_entry.get('text') or 'Unable to generate answer. Please try rephrasing your question.'
+    reply = best_entry.get('text') or 'I found some information, but couldn\'t generate a complete answer. Please try rephrasing your question.'
     return {'reply': reply, 'source': source}
 
 

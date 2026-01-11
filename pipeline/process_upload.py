@@ -311,6 +311,7 @@ def process(input_path: Path, status_path: Path = None):
     # EDGE: create torch .pt payload in-memory and encrypt
     if status_path:
         _write_status(status_path, {"stage": "edge_start", "message": "Edge: converting and encrypting payload"})
+    time.sleep(1)  # Delay to show animation
     # write human-readable edge payload JSONL for inspection/debug
     try:
         write_jsonl(OUTPUT_DIR / 'edge_payload.jsonl', records)
@@ -323,6 +324,7 @@ def process(input_path: Path, status_path: Path = None):
     torch.save(records, buf)
     edge_plain_bytes = buf.getvalue()
     encrypt_and_write(edge_plain_bytes, edge_pt_enc, edge_key_path)
+    time.sleep(1)  # Delay after encryption
     if status_path:
         _write_status(status_path, {
             "stage": "edge_done",
@@ -341,12 +343,14 @@ def process(input_path: Path, status_path: Path = None):
     # FOG: decrypt edge, dedupe vs global (use index for speed)
     if status_path:
         _write_status(status_path, {"stage": "fog_start", "message": "Fog: decrypting edge payload and validating against global index"})
+    time.sleep(1)  # Delay to show animation
     edge_plain = decrypt_bytes(edge_pt_enc.read_bytes(), load_key(edge_key_path))
     edge_records = torch.load(io.BytesIO(edge_plain))
 
     # Load or build index (fast repeated checks)
     index_keys = load_global_index()
     duplicates, new_entries = deduplicate_against_global(edge_records, index_keys=index_keys)
+    time.sleep(1)  # Delay after validation
 
     fog_report = f"Found {len(duplicates)} duplicates, {len(new_entries)} new entries"
     if status_path:
@@ -378,6 +382,7 @@ def process(input_path: Path, status_path: Path = None):
     torch.save(new_entries, buf2)
     fog_plain_bytes = buf2.getvalue()
     encrypt_and_write(fog_plain_bytes, fog_pt_enc, fog_key_path)
+    time.sleep(1)  # Delay after fog encryption
     if status_path:
         _write_status(status_path, {"stage": "fog_saved", "message": "Fog: new entries encrypted", "fog_enc": str(fog_pt_enc),
             "steps": {
@@ -406,6 +411,7 @@ def process(input_path: Path, status_path: Path = None):
                     "synced_to_edge": False,
                 }
             })
+        time.sleep(1)  # Delay to show animation
         append_to_global(GLOBAL_KB, fog_new)
         # rebuild index (since global changed)
         index_keys = build_global_index(GLOBAL_KB)
@@ -414,6 +420,7 @@ def process(input_path: Path, status_path: Path = None):
             write_jsonl(OUTPUT_DIR / 'global_kb_updated.jsonl', read_global_kb(GLOBAL_KB))
         except Exception:
             pass
+        time.sleep(1)  # Delay after appending
 
     # Create encrypted global .pt from the updated global_kb
     if status_path:
@@ -427,6 +434,7 @@ def process(input_path: Path, status_path: Path = None):
                 "synced_to_edge": False,
             }
         })
+    time.sleep(1)  # Delay to show animation
     all_global = read_global_kb(GLOBAL_KB)
     buf3 = io.BytesIO()
     torch.save(all_global, buf3)
@@ -434,6 +442,7 @@ def process(input_path: Path, status_path: Path = None):
     global_key_path = OUTPUT_DIR / 'global.key'
     global_pt_enc = OUTPUT_DIR / 'global.pt'
     encrypt_and_write(global_plain_bytes, global_pt_enc, global_key_path)
+    time.sleep(1)  # Delay after global encryption
 
     # Touch a sync marker so edge layer can pick up new global
     sync_marker = OUTPUT_DIR / 'global_sync.flag'

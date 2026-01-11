@@ -2,95 +2,1269 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Processing Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Status - Pipeline</title>
     <style>
-      body { background: linear-gradient(180deg,#f3eaff,#e9e6ff); color:#222; font-family: Arial, sans-serif }
-      body::after { content: ""; position: fixed; left:0; right:0; top:0; bottom:0; pointer-events:none; background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.6), transparent 20%), radial-gradient(circle at 80% 80%, rgba(230,220,255,0.5), transparent 25%); mix-blend-mode: overlay; }
-      .container { max-width:900px; margin:40px auto; padding:22px; background:rgba(255,255,255,0.94); border-radius:12px; box-shadow:0 10px 30px rgba(80,50,140,0.06) }
-      .loader { font-size: 18px; }
-      .ok { color: #2a9d46 }
-      .err { color: #d64545 }
-      a { color:#5b2d8a }
-      ul#stepsList li { padding:8px 0; font-weight:600 }
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --bg-card: #ffffff;
+        --text-primary: #1a1a1a;
+        --text-secondary: #333333;
+        --accent-primary: #000000;
+        --accent-secondary: #333333;
+        --accent-light: #f0f0f0;
+        --success: rgba(84, 8, 66, 0.356);
+        --error: #cc0000;
+        --border-color: #e0e0e0;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-hover: rgba(0, 0, 0, 0.15);
+        --processing: #4a4a4a;
+        --edge-color: rgba(84, 8, 66, 0.356);
+        --edge-gradient: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        --fog-color: rgba(84, 8, 66, 0.356);
+        --fog-gradient: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(84, 8, 66, 0.356) 100%);
+        --global-color: rgba(84, 8, 66, 0.356);
+        --global-gradient: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes checkmark {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+
+      @keyframes progressFlow {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+
+      @keyframes fileTransfer {
+        0% { transform: translateX(-100px) scale(0.8); opacity: 0; }
+        50% { opacity: 1; }
+        100% { transform: translateX(100px) scale(0.8); opacity: 0; }
+      }
+
+      @keyframes dataFlow {
+        0% { left: 0%; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { left: 100%; opacity: 0; }
+      }
+
+      @keyframes jumpCurve1 {
+        0% { 
+          left: -5px; 
+          top: 50%;
+          transform: translateY(-50%) rotate(0deg) scale(0.6);
+          opacity: 0;
+        }
+        5% { 
+          opacity: 1;
+          transform: translateY(-50%) rotate(5deg) scale(0.8);
+        }
+        20% { 
+          top: 15%;
+          transform: translateY(-50%) rotate(-10deg) scale(1.1);
+        }
+        40% { 
+          top: 50%;
+          transform: translateY(-50%) rotate(5deg) scale(1);
+        }
+        60% { 
+          top: 85%;
+          transform: translateY(-50%) rotate(-10deg) scale(1.1);
+        }
+        80% { 
+          top: 50%;
+          transform: translateY(-50%) rotate(5deg) scale(1);
+        }
+        90% { 
+          left: 95%;
+          opacity: 1;
+          transform: translateY(-50%) rotate(0deg) scale(0.9);
+        }
+        95% { 
+          left: 100%;
+          opacity: 0.5;
+          transform: translateY(-50%) rotate(0deg) scale(0.7);
+        }
+        100% { 
+          left: calc(100% + 5px); 
+          top: 50%;
+          transform: translateY(-50%) rotate(0deg) scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes jumpCurve2 {
+        0% { 
+          left: -5px; 
+          top: 50%;
+          transform: translateY(-50%) rotate(0deg) scale(0.6);
+          opacity: 0;
+        }
+        5% { 
+          opacity: 1;
+          transform: translateY(-50%) rotate(-5deg) scale(0.8);
+        }
+        20% { 
+          top: 25%;
+          transform: translateY(-50%) rotate(10deg) scale(1.1);
+        }
+        40% { 
+          top: 50%;
+          transform: translateY(-50%) rotate(-5deg) scale(1);
+        }
+        60% { 
+          top: 75%;
+          transform: translateY(-50%) rotate(10deg) scale(1.1);
+        }
+        80% { 
+          top: 50%;
+          transform: translateY(-50%) rotate(-5deg) scale(1);
+        }
+        90% { 
+          left: 95%;
+          opacity: 1;
+          transform: translateY(-50%) rotate(0deg) scale(0.9);
+        }
+        95% { 
+          left: 100%;
+          opacity: 0.5;
+          transform: translateY(-50%) rotate(0deg) scale(0.7);
+        }
+        100% { 
+          left: calc(100% + 5px); 
+          top: 50%;
+          transform: translateY(-50%) rotate(0deg) scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes glow {
+        0%, 100% { box-shadow: 0 0 10px rgba(84, 8, 66, 0.5), 0 0 20px rgba(84, 8, 66, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(84, 8, 66, 0.8), 0 0 40px rgba(84, 8, 66, 0.5); }
+      }
+
+      @keyframes glowPurple {
+        0%, 100% { box-shadow: 0 0 10px rgba(84, 8, 66, 0.356), 0 0 20px rgba(84, 8, 66, 0.356); }
+        50% { box-shadow: 0 0 20px rgba(84, 8, 66, 0.356), 0 0 40px rgba(84, 8, 66, 0.356); }
+      }
+
+      @keyframes glowGreen {
+        0%, 100% { box-shadow: 0 0 10px rgba(84, 8, 66, 0.5), 0 0 20px rgba(84, 8, 66, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(84, 8, 66, 0.8), 0 0 40px rgba(84, 8, 66, 0.5); }
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      @keyframes ripple {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(2); opacity: 0; }
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 40px 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 50px;
+        padding: 40px 30px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px var(--shadow);
+        border: 1px solid var(--border-color);
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+
+      .header .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 400;
+      }
+
+      .pipeline-visual {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 40px 0;
+        padding: 40px 30px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px var(--shadow);
+        border: 1px solid var(--border-color);
+        position: relative;
+      }
+
+      .pipeline-visual::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 15%;
+        right: 15%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--border-color) 0%, var(--border-color) 100%);
+        z-index: 0;
+        transform: translateY(-50%);
+        border-radius: 2px;
+      }
+
+      .pipeline-stage {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .stage-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: var(--bg-secondary);
+        border: 4px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        position: relative;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px var(--shadow);
+        overflow: visible;
+      }
+
+      .stage-icon svg {
+        width: 40px;
+        height: 40px;
+        fill: currentColor;
+      }
+
+      .default-icon svg {
+        width: 40px;
+        height: 40px;
+        fill: var(--text-secondary);
+      }
+
+      .stage-icon::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      #icon-edge.active {
+        border-color: var(--edge-color);
+        background: var(--edge-gradient);
+        color: white;
+        animation: glow 2s ease-in-out infinite, bounce 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(84, 8, 66, 0.5), 0 4px 15px rgba(84, 8, 66, 0.3);
+      }
+
+      #icon-edge.active::after {
+        background: radial-gradient(circle, rgba(84, 8, 66, 0.3) 0%, transparent 70%);
+        animation: ripple 2s ease-out infinite;
+        opacity: 1;
+      }
+
+      #icon-fog.active {
+        border-color: var(--fog-color);
+        background: var(--fog-gradient);
+        color: white;
+        animation: glowPurple 2s ease-in-out infinite, bounce 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(84, 8, 66, 0.356), 0 4px 15px rgba(84, 8, 66, 0.356);
+      }
+
+      #icon-fog.active::after {
+        background: radial-gradient(circle, rgba(84, 8, 66, 0.356) 0%, transparent 70%);
+        animation: ripple 2s ease-out infinite;
+        opacity: 1;
+      }
+
+      #icon-global.active {
+        border-color: var(--global-color);
+        background: var(--global-gradient);
+        color: white;
+        animation: glow 2s ease-in-out infinite, bounce 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(84, 8, 66, 0.5), 0 4px 15px rgba(84, 8, 66, 0.3);
+      }
+
+      #icon-global.active::after {
+        background: radial-gradient(circle, rgba(84, 8, 66, 0.3) 0%, transparent 70%);
+        animation: ripple 2s ease-out infinite;
+        opacity: 1;
+      }
+
+      .stage-icon.completed {
+        border-color: rgba(84, 8, 66, 0.356);
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        color: white;
+        animation: checkmark 0.5s ease;
+        box-shadow: 0 0 20px rgba(84, 8, 66, 0.4), 0 4px 15px rgba(84, 8, 66, 0.2);
+      }
+
+      .stage-icon .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .stage-icon .check {
+        width: 32px;
+        height: 32px;
+        position: relative;
+      }
+
+      .stage-icon .check::before,
+      .stage-icon .check::after {
+        content: "";
+        position: absolute;
+        background: white;
+        border-radius: 2px;
+      }
+
+      .stage-icon .check::before {
+        width: 2px;
+        height: 12px;
+        left: 10px;
+        top: 16px;
+        transform: rotate(-45deg);
+        animation: checkmark 0.3s ease 0.2s both;
+      }
+
+      .stage-icon .check::after {
+        width: 2px;
+        height: 20px;
+        right: 10px;
+        top: 10px;
+        transform: rotate(45deg);
+        animation: checkmark 0.3s ease 0.4s both;
+      }
+
+      .stage-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        transition: color 0.3s ease;
+      }
+
+      #stage-edge.active .stage-name {
+        color: var(--edge-color);
+      }
+
+      #stage-fog.active .stage-name {
+        color: var(--fog-color);
+      }
+
+      #stage-global.active .stage-name {
+        color: var(--global-color);
+      }
+
+      .stage-status {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        min-height: 20px;
+        font-weight: 400;
+      }
+
+      .connector {
+        flex: 0 0 60px;
+        height: 4px;
+        background: transparent;
+        border-top: 3px dotted var(--border-color);
+        position: relative;
+        margin: 0 15px;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        overflow: visible;
+      }
+
+      #connector-1.active {
+        border-top-color: var(--edge-color);
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.3);
+      }
+
+      #connector-2.active {
+        border-top-color: var(--fog-color);
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.3);
+      }
+
+      .file-packet {
+        position: absolute;
+        width: 20px;
+        height: 24px;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+        border: 2px solid var(--edge-color);
+        border-radius: 3px;
+        box-shadow: 0 2px 8px rgba(84, 8, 66, 0.6), 0 0 12px rgba(84, 8, 66, 0.4);
+        display: none;
+        z-index: 10;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .file-packet::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 4px;
+        height: 4px;
+        background: var(--edge-color);
+        border-radius: 1px;
+      }
+
+      .file-packet::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        left: 2px;
+        right: 2px;
+        height: 1px;
+        background: var(--edge-color);
+        opacity: 0.3;
+      }
+
+      #connector-1.active .file-packet {
+        display: block;
+        animation: jumpCurve1 2s ease-in-out infinite;
+        border-color: var(--edge-color);
+        box-shadow: 0 2px 8px rgba(84, 8, 66, 0.6), 0 0 12px rgba(84, 8, 66, 0.4);
+      }
+
+      #connector-1.active .file-packet::before {
+        background: var(--edge-color);
+      }
+
+      #connector-1.active .file-packet::after {
+        background: var(--edge-color);
+      }
+
+      #connector-1:not(.active) .file-packet {
+        display: none;
+        animation: none;
+      }
+
+      #connector-2.active .file-packet {
+        display: block;
+        animation: jumpCurve2 2s ease-in-out infinite;
+        border-color: var(--fog-color);
+        box-shadow: 0 2px 8px rgba(84, 8, 66, 0.6), 0 0 12px rgba(84, 8, 66, 0.4);
+      }
+
+      #connector-2.active .file-packet::before {
+        background: var(--fog-color);
+      }
+
+      #connector-2.active .file-packet::after {
+        background: var(--fog-color);
+      }
+
+      #connector-2:not(.active) .file-packet {
+        display: none;
+        animation: none;
+      }
+
+      .file-packet.active {
+        animation-delay: 0s;
+      }
+
+      .status-details {
+        background: var(--bg-card);
+        border-radius: 8px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 2px 8px var(--shadow);
+        border: 1px solid var(--border-color);
+        animation: fadeIn 1s ease;
+      }
+
+      .current-status {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: var(--accent-light);
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 4px solid var(--accent-primary);
+      }
+
+      .status-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(84, 8, 66, 0.356) 50%, rgba(84, 8, 66, 0.356) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 0 15px rgba(84, 8, 66, 0.4);
+      }
+
+      .status-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      .status-text {
+        flex: 1;
+      }
+
+      .status-text .stage-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+
+      .status-text .message {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        margin-top: 15px;
+        border: 1px solid var(--border-color);
+      }
+
+      .file-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--edge-color) 0%, var(--fog-color) 100%);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        animation: fileTransfer 3s ease-in-out infinite;
+        box-shadow: 0 2px 8px rgba(84, 8, 66, 0.3);
+      }
+
+      .file-details {
+        flex: 1;
+      }
+
+      .file-details .file-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+        font-size: 0.95rem;
+      }
+
+      .file-details .file-stats {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        margin: 8px 0;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-color);
+      }
+
+      .step-item:hover {
+        background: var(--accent-light);
+        box-shadow: 0 2px 4px var(--shadow);
+      }
+
+      .step-item.active {
+        background: var(--accent-light);
+        border-left: 4px solid var(--processing);
+      }
+
+      .step-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1rem;
+        background: var(--bg-primary);
+        border: 2px solid var(--border-color);
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+      }
+
+      .step-item.active .step-icon {
+        border-color: rgba(84, 8, 66, 0.356);
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        color: white;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.4);
+      }
+
+      #s_edge.active .step-icon {
+        background: var(--edge-gradient);
+        border-color: var(--edge-color);
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.4);
+      }
+
+      #s_store.active .step-icon,
+      #s_encrypt.active .step-icon,
+      #s_sync.active .step-icon {
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        border-color: rgba(84, 8, 66, 0.356);
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.4);
+      }
+
+      .step-item.completed .step-icon {
+        border-color: rgba(84, 8, 66, 0.356);
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        color: white;
+        animation: checkmark 0.5s ease;
+        box-shadow: 0 0 10px rgba(84, 8, 66, 0.4);
+      }
+
+      .step-item.completed .step-icon::before {
+        content: "";
+        width: 16px;
+        height: 16px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: inline-block;
+      }
+
+      .step-text {
+        flex: 1;
+        font-weight: 400;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+      }
+
+      .result-area {
+        display: none;
+        background: var(--bg-card);
+        border-radius: 8px;
+        padding: 40px;
+        margin: 30px 0;
+        box-shadow: 0 2px 8px var(--shadow);
+        border: 1px solid var(--border-color);
+        animation: fadeIn 0.5s ease;
+        text-align: center;
+      }
+
+      .result-area.show {
+        display: block;
+      }
+
+      .result-title {
+        font-size: 1.75rem;
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(84, 8, 66, 0.356) 50%, rgba(84, 8, 66, 0.356) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .result-title svg {
+        width: 24px;
+        height: 24px;
+        fill: rgba(84, 8, 66, 0.356);
+      }
+
+      .result-report {
+        padding: 20px;
+        background: var(--accent-light);
+        border-radius: 8px;
+        margin: 20px 0;
+        border-left: 4px solid var(--success);
+        font-size: 1rem;
+        color: var(--text-primary);
+        text-align: left;
+        font-weight: 400;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(84, 8, 66, 0.356) 50%, rgba(84, 8, 66, 0.356) 100%);
+        color: white;
+        text-decoration: none;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(84, 8, 66, 0.3);
+      }
+
+      .back-link:hover {
+        background: linear-gradient(135deg, rgba(84, 8, 66, 0.356) 0%, rgba(108, 20, 87, 0.747) 100%);
+        border-color: rgba(84, 8, 66, 0.356);
+        box-shadow: 0 6px 16px rgba(84, 8, 66, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .error-message {
+        padding: 20px;
+        background: #ffe6e6;
+        border-radius: 8px;
+        border-left: 4px solid var(--error);
+        color: var(--error);
+        font-weight: 500;
+        margin: 20px 0;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        padding: 20px;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      @media (max-width: 768px) {
+        .pipeline-visual {
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .pipeline-visual::before {
+          display: none;
+        }
+
+        .connector {
+          width: 2px;
+          height: 50px;
+          margin: 10px 0;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+        }
+
+        .stage-icon {
+          width: 60px;
+          height: 60px;
+          font-size: 1.5rem;
+        }
+
+        body {
+          padding: 20px 10px;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Processing Status</h1>
-      <div id="statusArea">
-        <p class="loader">Starting...</p>
-        <ul id="stepsList" style="list-style:none;padding-left:0">
-          <li id="s_edge">⬜ Update edge.pt</li>
-          <li id="s_fog">⬜ Validation in fog.pt</li>
-          <li id="s_valid">⬜ Validated dataset</li>
-          <li id="s_store">⬜ Store in dataset (global_kb.jsonl)</li>
-          <li id="s_encrypt">⬜ Encrypted to global.pt</li>
-          <li id="s_sync">⬜ Sync to edge layer</li>
+      <div class="header">
+        <h1>Data Pipeline Processing</h1>
+        <p class="subtitle">Real-time status monitoring through Edge → Fog → Global layers</p>
+      </div>
+
+      <div class="pipeline-visual">
+        <div class="pipeline-stage" id="stage-edge">
+          <div class="stage-icon" id="icon-edge">
+            <div class="spinner" style="display: none;"></div>
+            <span class="check" style="display: none;"></span>
+            <span class="default-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/>
+              </svg>
+            </span>
+          </div>
+          <div class="stage-name">Edge Layer</div>
+          <div class="stage-status" id="status-edge">Waiting...</div>
+        </div>
+
+        <div class="connector" id="connector-1">
+          <div class="file-packet" style="animation-delay: 0s;"></div>
+          <div class="file-packet" style="animation-delay: 0.8s;"></div>
+          <div class="file-packet" style="animation-delay: 1.6s;"></div>
+        </div>
+
+        <div class="pipeline-stage" id="stage-fog">
+          <div class="stage-icon" id="icon-fog">
+            <div class="spinner" style="display: none;"></div>
+            <span class="check" style="display: none;"></span>
+            <span class="default-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z"/>
+              </svg>
+            </span>
+          </div>
+          <div class="stage-name">Fog Layer</div>
+          <div class="stage-status" id="status-fog">Waiting...</div>
+        </div>
+
+        <div class="connector" id="connector-2">
+          <div class="file-packet" style="animation-delay: 0s;"></div>
+          <div class="file-packet" style="animation-delay: 0.8s;"></div>
+          <div class="file-packet" style="animation-delay: 1.6s;"></div>
+        </div>
+
+        <div class="pipeline-stage" id="stage-global">
+          <div class="stage-icon" id="icon-global">
+            <div class="spinner" style="display: none;"></div>
+            <span class="check" style="display: none;"></span>
+            <span class="default-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+            </span>
+          </div>
+          <div class="stage-name">Global Layer</div>
+          <div class="stage-status" id="status-global">Waiting...</div>
+        </div>
+      </div>
+
+      <div class="status-details">
+        <div class="current-status" id="currentStatus">
+          <div class="status-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+          </div>
+          <div class="status-text">
+            <div class="stage-label">Current Stage</div>
+            <div class="message" id="statusMessage">Initializing...</div>
+          </div>
+        </div>
+
+        <div class="file-info" id="fileInfo" style="display: none;">
+          <div class="file-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>
+          </div>
+          <div class="file-details">
+            <div class="file-name" id="fileName">Processing file...</div>
+            <div class="file-stats" id="fileStats"></div>
+          </div>
+        </div>
+
+        <ul class="steps-list" id="stepsList">
+          <li class="step-item" id="s_edge">
+            <div class="step-icon"></div>
+            <div class="step-text">Update edge.pt</div>
+          </li>
+          <li class="step-item" id="s_fog">
+            <div class="step-icon"></div>
+            <div class="step-text">Validation in fog.pt</div>
+          </li>
+          <li class="step-item" id="s_valid">
+            <div class="step-icon"></div>
+            <div class="step-text">Validated dataset</div>
+          </li>
+          <li class="step-item" id="s_store">
+            <div class="step-icon"></div>
+            <div class="step-text">Store in dataset (global_kb.jsonl)</div>
+          </li>
+          <li class="step-item" id="s_encrypt">
+            <div class="step-icon"></div>
+            <div class="step-text">Encrypted to global.pt</div>
+          </li>
+          <li class="step-item" id="s_sync">
+            <div class="step-icon"></div>
+            <div class="step-text">Sync to edge layer</div>
+          </li>
         </ul>
       </div>
-      <div id="resultArea" style="display:none">
-        <h2>Result</h2>
-        <div id="result"></div>
-        <p><a href="/">Upload another file</a></p>
+
+      <div class="result-area" id="resultArea">
+        <h2 class="result-title">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          </span>
+          <span>Processing Complete</span>
+        </h2>
+        <div class="result-report" id="resultReport"></div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <a href="/" class="back-link">Upload Another File</a>
+      </div>
       </div>
 
     <script>
       const jobid = "{{ jobid }}";
       const statusUrl = `/status/${jobid}`;
-      const summaryUrl = `/pipeline/output/${jobid}.summary.json`;
+      let lastStage = '';
+      let pollCount = 0;
+      const maxPollAttempts = 300; // 5 minutes max
+
+      function updateStageIcon(stage, state) {
+        const icon = document.getElementById(`icon-${stage}`);
+        if (!icon) return; // Safety check
+        
+        const status = document.getElementById(`status-${stage}`);
+        const spinner = icon.querySelector('.spinner');
+        const check = icon.querySelector('.check');
+        const defaultIcon = icon.querySelector('.default-icon');
+
+        icon.className = 'stage-icon';
+        
+        if (spinner) spinner.style.display = 'none';
+        if (check) check.style.display = 'none';
+        if (defaultIcon) defaultIcon.style.display = 'inline';
+
+        if (state === 'active') {
+          icon.classList.add('active');
+          if (spinner) spinner.style.display = 'block';
+          if (defaultIcon) defaultIcon.style.display = 'none';
+        } else if (state === 'completed') {
+          icon.classList.add('completed');
+          if (check) check.style.display = 'inline';
+          if (defaultIcon) defaultIcon.style.display = 'none';
+        }
+      }
+
+      function updateConnector(connectorId, active) {
+        const connector = document.getElementById(connectorId);
+        if (!connector) return; // Safety check
+        if (active) {
+          connector.classList.add('active');
+        } else {
+          connector.classList.remove('active');
+        }
+      }
+
+      function updateStepItem(stepId, state) {
+        const item = document.getElementById(stepId);
+        if (!item) return; // Safety check
+        item.className = 'step-item';
+        
+        if (state === 'active') {
+          item.classList.add('active');
+        } else if (state === 'completed') {
+          item.classList.add('completed');
+        }
+      }
+
+      function updateCurrentStatus(stage, message) {
+        const statusIcon = document.querySelector('.status-icon');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        if (statusMessage) statusMessage.textContent = message;
+        if (statusIcon) {
+          const icons = {
+            'ids_assigned': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/></svg>',
+            'edge_start': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/></svg>',
+            'edge_done': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+            'fog_start': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z"/></svg>',
+            'fog_done': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
+            'fog_saved': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>',
+            'global_updating': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+            'global_pt': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
+            'done': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
+          };
+          const defaultIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>';
+          statusIcon.innerHTML = icons[stage] || defaultIcon;
+        }
+      }
+
+      function updatePipelineVisual(stage) {
+        // Reset all stages
+        const stageEdge = document.getElementById('stage-edge');
+        const stageFog = document.getElementById('stage-fog');
+        const stageGlobal = document.getElementById('stage-global');
+        
+        if (stageEdge) stageEdge.classList.remove('active');
+        if (stageFog) stageFog.classList.remove('active');
+        if (stageGlobal) stageGlobal.classList.remove('active');
+        
+        updateStageIcon('edge', 'waiting');
+        updateStageIcon('fog', 'waiting');
+        updateStageIcon('global', 'waiting');
+        updateConnector('connector-1', false);
+        updateConnector('connector-2', false);
+
+        const statusEdge = document.getElementById('status-edge');
+        const statusFog = document.getElementById('status-fog');
+        const statusGlobal = document.getElementById('status-global');
+
+        if (stage === 'ids_assigned' || stage === 'edge_start') {
+          if (stageEdge) stageEdge.classList.add('active');
+          updateStageIcon('edge', 'active');
+          if (statusEdge) statusEdge.textContent = 'Processing...';
+          updateConnector('connector-1', false);
+          updateConnector('connector-2', false);
+        } else if (stage === 'edge_done') {
+          updateStageIcon('edge', 'completed');
+          if (statusEdge) statusEdge.textContent = 'Complete';
+          updateConnector('connector-1', true); // Start Edge → Fog transfer
+          if (stageFog) stageFog.classList.add('active');
+          updateStageIcon('fog', 'active');
+          if (statusFog) statusFog.textContent = 'Starting...';
+          updateConnector('connector-2', false);
+        } else if (stage === 'fog_start') {
+          updateStageIcon('edge', 'completed');
+          updateConnector('connector-1', true); // Continue Edge → Fog transfer
+          if (stageFog) stageFog.classList.add('active');
+          updateStageIcon('fog', 'active');
+          if (statusFog) statusFog.textContent = 'Validating...';
+          updateConnector('connector-2', false);
+        } else if (stage === 'fog_done') {
+          updateStageIcon('edge', 'completed');
+          updateConnector('connector-1', false); // Stop Edge → Fog transfer
+          updateStageIcon('fog', 'completed');
+          if (statusFog) statusFog.textContent = 'Complete';
+          updateConnector('connector-2', false);
+        } else if (stage === 'fog_saved') {
+          updateStageIcon('edge', 'completed');
+          updateConnector('connector-1', false); // Edge → Fog complete, stop animation
+          updateStageIcon('fog', 'completed');
+          updateConnector('connector-2', true); // Start Fog → Global transfer
+          if (stageGlobal) stageGlobal.classList.add('active');
+          updateStageIcon('global', 'active');
+          if (statusGlobal) statusGlobal.textContent = 'Starting...';
+        } else if (stage === 'global_updating' || stage === 'global_pt') {
+          updateStageIcon('edge', 'completed');
+          updateConnector('connector-1', false);
+          updateStageIcon('fog', 'completed');
+          updateConnector('connector-2', true); // Continue Fog → Global transfer
+          if (stageGlobal) stageGlobal.classList.add('active');
+          updateStageIcon('global', 'active');
+          if (statusGlobal) statusGlobal.textContent = stage === 'global_updating' ? 'Updating...' : 'Encrypting...';
+        } else if (stage === 'done') {
+          updateStageIcon('edge', 'completed');
+          updateConnector('connector-1', false); // Stop all animations
+          updateStageIcon('fog', 'completed');
+          updateConnector('connector-2', false); // Stop all animations
+          updateStageIcon('global', 'completed');
+          if (statusEdge) statusEdge.textContent = 'Complete';
+          if (statusFog) statusFog.textContent = 'Complete';
+          if (statusGlobal) statusGlobal.textContent = 'Complete';
+        }
+      }
 
       async function poll() {
+        pollCount++;
+        if (pollCount > maxPollAttempts) {
+          document.querySelector('.status-details').innerHTML = 
+            '<div class="error-message">Processing timeout. Please check the server logs.</div>';
+          return;
+        }
+
         try {
           const r = await fetch(statusUrl);
+          if (!r.ok) {
+            throw new Error(`HTTP ${r.status}`);
+          }
           const txt = await r.text();
           let obj = {};
-          try { obj = JSON.parse(txt); } catch(e){ obj = {stage:'unknown', message:txt}; }
-          document.getElementById('statusArea').innerHTML = `<p>Stage: <strong>${obj.stage}</strong></p><p>${obj.message || ''}</p>`;
+          try {
+            obj = JSON.parse(txt);
+          } catch(e) {
+            obj = {stage: 'unknown', message: txt};
+          }
 
-          if (obj.stage === 'done') {
-            // show result summary file if present
+          const stage = obj.stage || 'unknown';
+          
+          // Update current status
+          if (stage !== lastStage) {
+            updateCurrentStatus(stage, obj.message || 'Processing...');
+            updatePipelineVisual(stage);
+            lastStage = stage;
+          }
+
+          // Update file info if available
+          if (obj.count !== undefined) {
+            document.getElementById('fileInfo').style.display = 'flex';
+            document.getElementById('fileStats').textContent = `Processing ${obj.count} records...`;
+          }
+
+          if (obj.duplicates !== undefined && obj.new_entries !== undefined) {
+            document.getElementById('fileInfo').style.display = 'flex';
+            document.getElementById('fileStats').textContent = 
+              `Found ${obj.duplicates} duplicates, ${obj.new_entries} new entries`;
+          }
+
+          // Update steps
+          if (obj.steps) {
+            if (obj.steps.edge_updated) updateStepItem('s_edge', 'completed');
+            else if (stage === 'edge_start' || stage === 'edge_done') updateStepItem('s_edge', 'active');
+            
+            if (obj.steps.fog_validated) updateStepItem('s_fog', 'completed');
+            else if (stage === 'fog_start' || stage === 'fog_done') updateStepItem('s_fog', 'active');
+            
+            if (obj.steps.validated_dataset) updateStepItem('s_valid', 'completed');
+            else if (stage === 'fog_saved') updateStepItem('s_valid', 'active');
+            
+            if (obj.steps.stored_in_global) updateStepItem('s_store', 'completed');
+            else if (stage === 'global_updating') updateStepItem('s_store', 'active');
+            
+            if (obj.steps.encrypted_global) updateStepItem('s_encrypt', 'completed');
+            else if (stage === 'global_pt') updateStepItem('s_encrypt', 'active');
+            
+            if (obj.steps.synced_to_edge) updateStepItem('s_sync', 'completed');
+            else if (stage === 'done') updateStepItem('s_sync', 'active');
+          }
+
+          if (stage === 'done') {
             try {
               const sres = await fetch(`/summary/${jobid}`);
               if (sres.ok) {
                 const summary = await sres.json();
-                let html = `<p class="ok">${summary.report}</p>`;
-                html += `<ul>`;
-                const keys = ['edge_enc','fog_enc','global_enc','edge_key','fog_key','global_key'];
-                for (const k of keys) {
-                  if (summary[k]) {
-                    // build download path relative to /download
-                    const p = summary[k].split('/pipeline/output/').pop();
-                    html += `<li><a href="/download/${p}">${k}</a></li>`;
+                document.getElementById('resultReport').textContent = summary.report || 'Processing completed successfully!';
+                
+                // Show statistics
+                const statsGrid = document.getElementById('statsGrid');
+                if (summary.duplicates !== undefined || summary.new_entries !== undefined) {
+                  statsGrid.innerHTML = '';
+                  
+                  if (summary.duplicates !== undefined) {
+                    const dupCard = document.createElement('div');
+                    dupCard.className = 'stat-card';
+                    dupCard.innerHTML = `
+                      <div class="stat-value">${summary.duplicates}</div>
+                      <div class="stat-label">Duplicates Found</div>
+                    `;
+                    statsGrid.appendChild(dupCard);
+                  }
+                  
+                  if (summary.new_entries !== undefined) {
+                    const newCard = document.createElement('div');
+                    newCard.className = 'stat-card';
+                    newCard.innerHTML = `
+                      <div class="stat-value">${summary.new_entries}</div>
+                      <div class="stat-label">New Entries Added</div>
+                    `;
+                    statsGrid.appendChild(newCard);
                   }
                 }
-                html += `</ul>`;
-                document.getElementById('result').innerHTML = html;
-                document.getElementById('resultArea').style.display = 'block';
-                document.getElementById('statusArea').style.display = 'none';
+                
+                document.getElementById('resultArea').classList.add('show');
+                document.querySelector('.status-details').style.display = 'none';
                 return;
               }
             } catch(e) {
-              console.warn('no summary yet');
+              console.warn('No summary yet:', e);
             }
           }
-          // update checklist if steps available
-          if (obj.steps) {
-            document.getElementById('s_edge').innerText = (obj.steps.edge_updated? '✅':'⬜') + ' Update edge.pt';
-            document.getElementById('s_fog').innerText = (obj.steps.fog_validated? '✅':'⬜') + ' Validation in fog.pt';
-            document.getElementById('s_valid').innerText = (obj.steps.validated_dataset? '✅':'⬜') + ' Validated dataset';
-            document.getElementById('s_store').innerText = (obj.steps.stored_in_global? '✅':'⬜') + ' Store in dataset (global_kb.jsonl)';
-            document.getElementById('s_encrypt').innerText = (obj.steps.encrypted_global? '✅':'⬜') + ' Encrypted to global.pt';
-            document.getElementById('s_sync').innerText = (obj.steps.synced_to_edge? '✅':'⬜') + ' Sync to edge layer';
-          }
 
-          if (obj.stage === 'error') {
-            document.getElementById('statusArea').innerHTML = `<p class="err">Error: ${obj.message}</p>`;
+          if (stage === 'error') {
+            const statusArea = document.querySelector('.status-details');
+            statusArea.innerHTML = `<div class="error-message">Error: ${obj.message}</div>`;
+            return;
           }
         } catch (e) {
-          document.getElementById('statusArea').innerText = 'Error polling status';
+          console.error('Error polling status:', e);
+          // Don't show error immediately, wait a few attempts
+          if (pollCount > 3) {
+            document.querySelector('.status-details').innerHTML = 
+              '<div class="error-message">Error polling status. Please refresh the page.</div>';
+            return;
+          }
         }
+        
         setTimeout(poll, 1000);
       }
+
       poll();
     </script>
   </body>

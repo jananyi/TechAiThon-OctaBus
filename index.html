@@ -542,6 +542,14 @@
             letter-spacing: -1px;
         }
 
+        .hero-title br {
+            line-height: 1.1;
+            display: block;
+            content: "";
+            margin: 0;
+            height: 0;
+        }
+
         .hero-subtitle {
             font-size: 1.1rem;
             color: var(--text-secondary);
@@ -553,6 +561,11 @@
         .typewriter-container {
             display: inline-block;
             position: relative;
+            vertical-align: baseline;
+            height: 1.2em;
+            line-height: 1.2em;
+            text-align: left;
+            overflow: visible;
         }
 
         .typewriter-text {
@@ -560,14 +573,23 @@
             font-weight: 800;
             position: relative;
             display: inline-block;
+            white-space: nowrap;
+            text-align: left;
+            line-height: 1.2em;
+            height: 1.2em;
+            vertical-align: baseline;
         }
 
         .typewriter-text::after {
             content: '|';
             position: absolute;
-            right: -10px;
+            right: -12px;
+            top: 0;
             color: var(--xebia-light);
             animation: blink 1s infinite;
+            display: inline-block;
+            line-height: 1.2em;
+            height: 1.2em;
         }
 
         @keyframes blink {
@@ -803,6 +825,22 @@
             border: 1px solid rgba(131, 27, 132, 0.1);
         }
 
+        .layer::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(180deg, var(--xebia-purple) 0%, transparent 100%);
+            opacity: 0.6;
+        }
+
+        .layer:last-of-type::after {
+            display: none;
+        }
+
         .layer-title {
             font-size: 1.4rem;
             font-weight: 800;
@@ -883,6 +921,46 @@
             position: relative;
             margin: 20px 0;
             text-align: center;
+            padding: 20px 0;
+        }
+
+        .encrypted-updates::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--xebia-purple) 0%, transparent 100%);
+            z-index: 0;
+        }
+
+        .encrypted-updates::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent 0%, var(--xebia-purple) 50%, transparent 100%);
+            z-index: 1;
+            animation: flowDown 2s ease-in-out infinite;
+        }
+
+        @keyframes flowDown {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
         }
 
         .encrypted-updates span {
@@ -893,6 +971,9 @@
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--xebia-purple);
+            position: relative;
+            z-index: 2;
+            display: inline-block;
         }
 
         .model-updates {
@@ -901,12 +982,36 @@
             border-radius: 10px;
             margin-top: 20px;
             border: 2px solid var(--xebia-purple);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-updates::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(131, 27, 132, 0.3) 50%, transparent 70%);
+            animation: flowAcross 3s linear infinite;
+        }
+
+        @keyframes flowAcross {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
         }
 
         .model-updates span {
             font-weight: 700;
             color: var(--xebia-purple);
             font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
         }
 
         .lora-adapter {
@@ -2859,9 +2964,14 @@
             alert('Thank you! Your message has been sent. Opening WhatsApp for immediate connection...');
         });
 
-        // Typewriter effect
+        // Typewriter effect - FIXED
         function initTypewriter() {
             const typewriterElement = document.getElementById('typewriter');
+            if (!typewriterElement) {
+                console.warn('Typewriter element not found');
+                return;
+            }
+            
             const words = ['INTELLIGENCE', 'PRIVACY', 'SCALABILITY', 'SECURITY'];
             let wordIndex = 0;
             let charIndex = 0;
@@ -2869,6 +2979,8 @@
             let typingSpeed = 100;
             
             function type() {
+                if (!typewriterElement) return;
+                
                 const currentWord = words[wordIndex];
                 
                 if (isDeleting) {
@@ -2893,11 +3005,15 @@
                 setTimeout(type, typingSpeed);
             }
             
+            // Start typing after a short delay
             setTimeout(type, 1000);
         }
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize typewriter effect
+            initTypewriter();
+            
             const reveals = document.querySelectorAll('.scroll-reveal');
             reveals.forEach(element => {
                 const windowHeight = window.innerHeight;
@@ -2909,7 +3025,6 @@
                 }
             });
             
-            initTypewriter();
             updateActiveNav();
             
             // Apply theme transition
@@ -2967,6 +3082,11 @@
         
         // Fix for any overflow issues
         window.addEventListener('load', function() {
+            // Initialize typewriter as fallback if not already initialized
+            if (document.getElementById('typewriter') && !document.getElementById('typewriter').textContent.includes('INTELLIGENCE')) {
+                initTypewriter();
+            }
+            
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
             
