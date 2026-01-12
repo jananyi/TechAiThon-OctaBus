@@ -1,1 +1,0 @@
-{"stage": "done", "message": "All done", "global_enc": "C:\\Users\\Tech-AIThon\\Downloads\\-\\pipeline\\output\\global.pt", "steps": {"edge_updated": true, "fog_validated": true, "validated_dataset": true, "stored_in_global": true, "encrypted_global": true, "synced_to_edge": true}}
